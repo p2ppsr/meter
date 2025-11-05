@@ -45,6 +45,7 @@ const anyoneWallet = new ProtoWallet('anyone')
 
 // Local wallet
 const walletClient = new WalletClient()
+const NETWORK_PRESET = 'local' // Change to 'mainnet' for production usage
 
 // These are some basic styling rules for the React application.
 // We are using MUI (https://mui.com) for all of our UI components (i.e. buttons and dialogs etc.).
@@ -131,7 +132,7 @@ const App: React.FC = () => {
       const txid = transaction.id('hex')
 
       const args: SHIPBroadcasterConfig = {
-        networkPreset: (await walletClient.getNetwork({})).network
+        networkPreset: NETWORK_PRESET
       }
       const broadcaster = new SHIPBroadcaster(['tm_meter'], args)
       const broadcasterResult = await broadcaster.broadcast(transaction)
@@ -169,7 +170,7 @@ const App: React.FC = () => {
         let lookupResult: any = undefined
 
         try {
-          const resolver = new LookupResolver({ networkPreset: (await walletClient.getNetwork({})).network })
+          const resolver = new LookupResolver({ networkPreset: NETWORK_PRESET })
           lookupResult = await resolver.query({
             service: 'ls_meter',
             query: { findAll: true }
@@ -357,7 +358,7 @@ const App: React.FC = () => {
       facilitator.allowHTTP = true // Manually override in case constructor ignores it
 
       const args: SHIPBroadcasterConfig = {
-        networkPreset: (await walletClient.getNetwork({})).network,
+        networkPreset: NETWORK_PRESET,
         facilitator,
         requireAcknowledgmentFromAnyHostForTopics: 'any'
       }
@@ -501,7 +502,7 @@ const App: React.FC = () => {
       facilitator.allowHTTP = true // Manually override in case constructor ignores it
 
       const args: SHIPBroadcasterConfig = {
-        networkPreset: (await walletClient.getNetwork({})).network,
+        networkPreset: NETWORK_PRESET,
         facilitator,
         requireAcknowledgmentFromAnyHostForTopics: 'any'
       }
