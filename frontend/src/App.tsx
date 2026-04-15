@@ -45,7 +45,35 @@ const anyoneWallet = new ProtoWallet('anyone')
 
 // Local wallet
 const walletClient = new WalletClient()
-const NETWORK_PRESET = 'local' // Change to 'mainnet' for production usage
+type NetworkPreset = NonNullable<SHIPBroadcasterConfig['networkPreset']>
+
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1'])
+
+const isLocalRuntime = (): boolean => {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const { hostname } = window.location
+  return LOCAL_HOSTNAMES.has(hostname) || hostname.endsWith('.local')
+}
+
+const NETWORK_PRESET: NetworkPreset = isLocalRuntime() ? 'local' : 'mainnet'
+
+const createBroadcasterConfig = (): SHIPBroadcasterConfig => {
+  const config: SHIPBroadcasterConfig = {
+    networkPreset: NETWORK_PRESET
+  }
+
+  if (NETWORK_PRESET === 'local') {
+    const facilitator = new HTTPSOverlayBroadcastFacilitator(fetch, true)
+    facilitator.allowHTTP = true
+    config.facilitator = facilitator
+    config.requireAcknowledgmentFromAnyHostForTopics = 'any'
+  }
+
+  return config
+}
 
 // These are some basic styling rules for the React application.
 // We are using MUI (https://mui.com) for all of our UI components (i.e. buttons and dialogs etc.).
@@ -131,10 +159,10 @@ const App: React.FC = () => {
       const transaction = Transaction.fromAtomicBEEF(newMeterToken.tx)
       const txid = transaction.id('hex')
 
-      const args: SHIPBroadcasterConfig = {
-        networkPreset: NETWORK_PRESET
-      }
-      const broadcaster = new SHIPBroadcaster(['tm_meter'], args)
+      const broadcaster = new SHIPBroadcaster(
+        ['tm_meter'],
+        createBroadcasterConfig()
+      )
       const broadcasterResult = await broadcaster.broadcast(transaction)
       console.log('broadcasterResult:', broadcasterResult)
       if (broadcasterResult.status === 'error') {
@@ -353,16 +381,10 @@ const App: React.FC = () => {
       const transaction = Transaction.fromAtomicBEEF(newMeterToken.tx)
       const txid = transaction.id('hex')
 
-      // Configure SHIP Broadcaster with allowHTTP set to true
-      const facilitator = new HTTPSOverlayBroadcastFacilitator(fetch, true)
-      facilitator.allowHTTP = true // Manually override in case constructor ignores it
-
-      const args: SHIPBroadcasterConfig = {
-        networkPreset: NETWORK_PRESET,
-        facilitator,
-        requireAcknowledgmentFromAnyHostForTopics: 'any'
-      }
-      const broadcaster = new SHIPBroadcaster(['tm_meter'], args)
+      const broadcaster = new SHIPBroadcaster(
+        ['tm_meter'],
+        createBroadcasterConfig()
+      )
 
       console.log('handleIncrement: broadcaster:', broadcaster)
 
@@ -497,16 +519,10 @@ const App: React.FC = () => {
       const transaction = Transaction.fromAtomicBEEF(newMeterToken.tx)
       const txid = transaction.id('hex')
 
-      // Configure SHIP Broadcaster with allowHTTP set to true
-      const facilitator = new HTTPSOverlayBroadcastFacilitator(fetch, true)
-      facilitator.allowHTTP = true // Manually override in case constructor ignores it
-
-      const args: SHIPBroadcasterConfig = {
-        networkPreset: NETWORK_PRESET,
-        facilitator,
-        requireAcknowledgmentFromAnyHostForTopics: 'any'
-      }
-      const broadcaster = new SHIPBroadcaster(['tm_meter'], args)
+      const broadcaster = new SHIPBroadcaster(
+        ['tm_meter'],
+        createBroadcasterConfig()
+      )
 
       console.log('handleDecrement: broadcaster:', broadcaster)
 
