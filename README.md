@@ -1,4 +1,7 @@
 ## Meter for the New World
+
+This app is a Babbage-operated example built on the BRC-100 wallet model and the BSV TypeScript SDK. It can run with Babbage's Metanet distributions or any compatible wallet where the app's dependencies and deployment configuration support it.
+
 If you have problems accessing hosts:
 `broadcasterResult.description: All local topical hosts have rejected the transaction.`
 
